@@ -1,12 +1,14 @@
 "use strict";
 
 /**
- * Sprint 3 GIS Mapping Demo
- * - Leaflet basemap + custom GeoJSON layers (points + polygon)
- * - Styling by category
- * - Popups + hover tooltips
+ * Sprint 3 GIS Mapping Demo (Leaflet + GeoJSON)
+ * - Basemap layer
+ * - Custom layers (points + polygon boundary)
+ * - Styled symbology by category
+ * - Popups + tooltips
  * - Layer toggles
- * - Search + category filter (stretch)
+ * - Stretch: search + category filter
+ * - Debug: click map to show exact coordinates + GeoJSON format
  */
 
 const statusEl = document.getElementById("status");
@@ -19,30 +21,38 @@ function setStatus(msg) {
   statusEl.textContent = msg;
 }
 
-// --- Map setup ---
+// ----------------------
+// Map Setup
+// ----------------------
 const map = L.map("map", { zoomControl: true }).setView([43.8153, -111.7845], 15);
 
-// Basemap (Requirement #1)
+// Basemaps
 const osm = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   maxZoom: 19,
   attribution: '&copy; OpenStreetMap contributors'
 }).addTo(map);
 
-// Optional second basemap (nice for demo)
 const topo = L.tileLayer("https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png", {
   maxZoom: 17,
   attribution: '&copy; OpenTopoMap contributors'
 });
 
-// Category colors (symbology)
-const categoryStyle = {
-  Study:   { radius: 8, weight: 2, fillOpacity: 0.9 },
-  Services:{ radius: 8, weight: 2, fillOpacity: 0.9 },
-  Fitness: { radius: 8, weight: 2, fillOpacity: 0.9 },
-  Parking: { radius: 8, weight: 2, fillOpacity: 0.9 },
-  Default: { radius: 8, weight: 2, fillOpacity: 0.9 }
-};
+// ✅ DEBUG: click map to get perfect coordinates
+// Leaflet gives (lat, lng). GeoJSON needs [lng, lat].
+map.on("click", (e) => {
+  const { lat, lng } = e.latlng;
 
+  const msg =
+    `Lat,Lng: ${lat.toFixed(6)}, ${lng.toFixed(6)}  |  ` +
+    `GeoJSON: [${lng.toFixed(6)}, ${lat.toFixed(6)}]`;
+
+  console.log(msg);
+  setStatus(msg);
+});
+
+// ----------------------
+// Styling helpers
+// ----------------------
 function pickFillColor(category) {
   switch (category) {
     case "Study": return "#4ea1ff";
@@ -53,23 +63,15 @@ function pickFillColor(category) {
   }
 }
 
-function pointToLayer(feature, latlng) {
-  const cat = feature?.properties?.category ?? "Default";
-  const base = categoryStyle[cat] ?? categoryStyle.Default;
-
-  return L.circleMarker(latlng, {
-    ...base,
-    color: "#0b0c10",
-    fillColor: pickFillColor(cat)
-  });
+function escapeHtml(str) {
+  return String(str)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
 
-// Layers
-let boundaryLayer = null;
-let allPoints = [];          // raw features for filtering
-let pointsLayer = null;      // Leaflet GeoJSON layer
-
-// Helper: create popup HTML
 function popupHtml(props) {
   const name = props?.name ?? "Unknown";
   const category = props?.category ?? "Uncategorized";
@@ -83,17 +85,25 @@ function popupHtml(props) {
   `;
 }
 
-// Small HTML escape for safety (demo-quality)
-function escapeHtml(str) {
-  return String(str)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
+function pointToLayer(feature, latlng) {
+  const cat = feature?.properties?.category ?? "Default";
+  return L.circleMarker(latlng, {
+    radius: 8,
+    weight: 2,
+    color: "#0b0c10",
+    fillColor: pickFillColor(cat),
+    fillOpacity: 0.9
+  });
 }
 
-// Build points layer from an array of GeoJSON Features
+// ----------------------
+// Layers + data
+// ----------------------
+let boundaryLayer = null;
+let pointsLayer = null;
+let allPoints = [];
+
+// Create points layer from filtered features
 function buildPointsLayer(features) {
   if (pointsLayer) pointsLayer.remove();
 
@@ -103,23 +113,21 @@ function buildPointsLayer(features) {
       pointToLayer,
       onEachFeature: (feature, layer) => {
         const props = feature.properties || {};
-        // Requirement #5: Interaction (click -> popup)
-        layer.bindPopup(popupHtml(props));
 
-        // Requirement #3: readable labels (hover tooltip)
-        const name = props.name ?? "Location";
-        layer.bindTooltip(name, { direction: "top", offset: [0, -8], opacity: 0.95 });
+        layer.bindPopup(popupHtml(props));
+        layer.bindTooltip(props.name ?? "Location", {
+          direction: "top",
+          offset: [0, -8],
+          opacity: 0.95
+        });
       }
     }
-  );
-
-  pointsLayer.addTo(map);
+  ).addTo(map);
 }
 
-// Update category dropdown options
+// Populate dropdown categories
 function populateCategories(features) {
   const cats = new Set(features.map(f => f.properties?.category).filter(Boolean));
-  // clear
   categorySelect.innerHTML = `<option value="ALL">All categories</option>`;
   [...cats].sort().forEach(cat => {
     const opt = document.createElement("option");
@@ -129,7 +137,7 @@ function populateCategories(features) {
   });
 }
 
-// Filter logic (stretch challenge)
+// Filter logic (search + category)
 function applyFilters() {
   const text = searchBox.value.trim().toLowerCase();
   const cat = categorySelect.value;
@@ -143,17 +151,16 @@ function applyFilters() {
   });
 
   buildPointsLayer(filtered);
-
   setStatus(`Showing ${filtered.length} of ${allPoints.length} locations`);
 }
 
-// Fit map to all visible data
+// Fit map to current visible layers
 function fitToVisibleData() {
-  const groups = [];
-  if (boundaryLayer) groups.push(boundaryLayer);
-  if (pointsLayer) groups.push(pointsLayer);
+  const layers = [];
+  if (boundaryLayer) layers.push(boundaryLayer);
+  if (pointsLayer) layers.push(pointsLayer);
 
-  const fg = L.featureGroup(groups);
+  const fg = L.featureGroup(layers);
   const bounds = fg.getBounds();
 
   if (bounds.isValid()) {
@@ -161,7 +168,9 @@ function fitToVisibleData() {
   }
 }
 
-// --- Load GeoJSON data ---
+// ----------------------
+// Loading GeoJSON
+// ----------------------
 async function loadGeoJson(url) {
   const res = await fetch(url);
   if (!res.ok) throw new Error(`Failed to load ${url} (${res.status})`);
@@ -173,7 +182,6 @@ async function loadGeoJson(url) {
     setStatus("Loading boundary…");
     const boundary = await loadGeoJson("data/boundary.geojson");
 
-    // Requirement #2: custom data layer (polygon)
     boundaryLayer = L.geoJSON(boundary, {
       style: {
         color: "#4ea1ff",
@@ -198,22 +206,24 @@ async function loadGeoJson(url) {
     populateCategories(allPoints);
     buildPointsLayer(allPoints);
 
-    // Requirement #5: toggling layers with Leaflet control
+    // Layer controls (base + overlays)
     const baseMaps = { "OpenStreetMap": osm, "Topo (Optional)": topo };
     const overlayMaps = { "Boundary": boundaryLayer, "Locations": pointsLayer };
     L.control.layers(baseMaps, overlayMaps, { collapsed: false }).addTo(map);
 
     fitToVisibleData();
-    setStatus(`Loaded ${allPoints.length} locations`);
+    setStatus(`Loaded ${allPoints.length} locations (click map for coordinates)`);
   } catch (err) {
     console.error(err);
     setStatus(`Error: ${err.message}`);
   }
 })();
 
-// --- UI Events ---
-searchBox.addEventListener("input", () => applyFilters());
-categorySelect.addEventListener("change", () => applyFilters());
+// ----------------------
+// UI Events
+// ----------------------
+searchBox.addEventListener("input", applyFilters);
+categorySelect.addEventListener("change", applyFilters);
 
 btnClear.addEventListener("click", () => {
   searchBox.value = "";
@@ -222,4 +232,4 @@ btnClear.addEventListener("click", () => {
   fitToVisibleData();
 });
 
-btnFit.addEventListener("click", () => fitToVisibleData());
+btnFit.addEventListener("click", fitToVisibleData);

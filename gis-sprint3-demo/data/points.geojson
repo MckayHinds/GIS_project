@@ -8,16 +8,16 @@
         "category": "Study",
         "description": "Quiet study space with computers and printing."
       },
-      "geometry": { "type": "Point", "coordinates": [-111.7852, 43.8149] }
+      "geometry": { "type": "Point", "coordinates": [-111.78249219869436,43.81960364415823 ] }
     },
     {
       "type": "Feature",
       "properties": {
-        "name": "Student Center",
+        "name": "I-Center",
         "category": "Services",
-        "description": "Food, student services, and meeting spaces."
+        "description": "Student activities, Devotional."
       },
-      "geometry": { "type": "Point", "coordinates": [-111.7837, 43.8161] }
+      "geometry": { "type": "Point", "coordinates": [-111.7851797720539, 43.81845407886958 ] }
     },
     {
       "type": "Feature",
@@ -26,16 +26,16 @@
         "category": "Fitness",
         "description": "Workout area and courts."
       },
-      "geometry": { "type": "Point", "coordinates": [-111.7829, 43.8142] }
+      "geometry": { "type": "Point", "coordinates": [-111.78514818539954, 43.819536027995746] }
     },
     {
       "type": "Feature",
       "properties": {
-        "name": "Parking Lot A",
-        "category": "Parking",
-        "description": "Main parking area for visitors."
+        "name": "Manwaring Center",
+        "category": "Services",
+        "description": "Food, student services, and meeting spaces"
       },
-      "geometry": { "type": "Point", "coordinates": [-111.7867, 43.8164] }
+      "geometry": { "type": "Point", "coordinates": [-111.78273359745731, 43.81850052638185] }
     }
   ]
 }

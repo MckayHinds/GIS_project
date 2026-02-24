@@ -18,7 +18,7 @@
 <body>
   <header class="header">
     <h1>Sprint 3 GIS Mapping Demo</h1>
-    <p class="subtitle">Interactive map with layers, styled features, popups, search, and filters.</p>
+    <p class="subtitle">Interactive map with layers, styling, popups, and filters (with coordinate debug click).</p>
   </header>
 
   <main class="layout">
@@ -40,24 +40,28 @@
 
       <hr />
 
+      <h2>Debug Tool</h2>
+      <p class="hint">
+        Click anywhere on the map to get exact coordinates.
+        The status bar will show both <b>Lat/Lng</b> and the correct <b>GeoJSON [lng, lat]</b> format.
+      </p>
+
+      <hr />
+
       <h2>What this demonstrates</h2>
       <ul>
         <li>Basemap layer (OSM)</li>
         <li>Custom data layers (Points + Polygon boundary)</li>
         <li>Styled symbology by category</li>
         <li>Popups + hover labels</li>
-        <li>Layer toggles (Leaflet control)</li>
+        <li>Layer toggles</li>
         <li>Search + category filter (stretch)</li>
       </ul>
-
-      <p class="hint">
-        Tip: Click markers for details. Use the layer control on the map (top-right) to toggle layers.
-      </p>
     </aside>
 
     <section class="mapWrap">
       <div id="map"></div>
-      <div id="status" class="status">Loading data…</div>
+      <div id="status" class="status">Loading…</div>
     </section>
   </main>
 
