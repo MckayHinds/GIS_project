@@ -1,0 +1,41 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Main Library",
+        "category": "Study",
+        "description": "Quiet study space with computers and printing."
+      },
+      "geometry": { "type": "Point", "coordinates": [-111.7852, 43.8149] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Student Center",
+        "category": "Services",
+        "description": "Food, student services, and meeting spaces."
+      },
+      "geometry": { "type": "Point", "coordinates": [-111.7837, 43.8161] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Gym / Fitness",
+        "category": "Fitness",
+        "description": "Workout area and courts."
+      },
+      "geometry": { "type": "Point", "coordinates": [-111.7829, 43.8142] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Parking Lot A",
+        "category": "Parking",
+        "description": "Main parking area for visitors."
+      },
+      "geometry": { "type": "Point", "coordinates": [-111.7867, 43.8164] }
+    }
+  ]
+}

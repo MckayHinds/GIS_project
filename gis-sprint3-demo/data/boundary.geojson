@@ -1,0 +1,24 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Demo Boundary",
+        "description": "Example polygon area to demonstrate a custom layer."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-111.7875, 43.8170],
+            [-111.7815, 43.8170],
+            [-111.7815, 43.8132],
+            [-111.7875, 43.8132],
+            [-111.7875, 43.8170]
+          ]
+        ]
+      }
+    }
+  ]
+}
